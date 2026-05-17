@@ -12,3 +12,4 @@ C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\refint\TheMe
 C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.pdb
 C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.genruntimeconfig.cache
 C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\ref\TheMerchant.dll
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.sourcelink.json

@@ -18,20 +18,13 @@ public class Citta
         {
             Sesso = rand.Next(0, 2) == 0,
             ClasseSociale = (TipoClasse)rand.Next(0, 3),
-            Pazienza = 1f,
+            Pazienza = 1f, //pazienza minima
             ProdottoDesiderato = null 
-            };
-         if(cliente.ClasseSociale == TipoClasse.Bassa)
-        {
-            int scelta = rand.Next(0, 3);
-            if (scelta < 2) cliente.ProdottoDesiderato = ScegliProdotto(cliente);
-        }
-        else
-        {
-            int scelta = rand.Next(0, 5);
-            if (scelta < 2) cliente.ProdottoDesiderato = ScegliProdotto(cliente);
-        }
+        };
 
+        cliente.Pazienza = scegliPazienza(cliente);
+        if(scegliSeComprare(cliente)) cliente.ProdottoDesiderato = ScegliProdotto(cliente);
+         
         Clienti.Add(cliente);
 
         Console.WriteLine($"Nuovo cliente: Sesso: {(cliente.Sesso ? "Maschio" : "Femmina")}, Classe Sociale: {cliente.ClasseSociale}, Pazienza: {cliente.Pazienza}, Prodotto Desiderato: {(cliente.ProdottoDesiderato.HasValue ? cliente.ProdottoDesiderato.Value.Item1.Nome : "Nessuno")}");
@@ -116,5 +109,37 @@ public class Citta
         int indiceCasuale = rand.Next(opzioni.Count);
         Prodotto prodottoTrovato= opzioni[indiceCasuale];
         return (prodottoTrovato, 1);
+    }
+
+    private float scegliPazienza(Cliente cliente)
+    {
+        Random rand = new Random();
+        double calcolo = cliente.Pazienza;
+
+        if(cliente.ClasseSociale == TipoClasse.Bassa)
+            calcolo += rand.NextDouble() * 1 + 0.5; //aggiunge pazienza tra 0.5 e 1.5
+        else if(cliente.ClasseSociale == TipoClasse.Media)
+            calcolo += rand.NextDouble() * 0.5 + 0.25; //aggiunge pazienza tra 0.25 e 0.75
+        else
+            calcolo += rand.NextDouble() * 0.5; //aggiunge pazienza tra 0 e 0.5
+        return (float)Math.Round(calcolo, 2);
+    }
+
+    private bool scegliSeComprare(Cliente cliente)
+    {
+        Random rand = new Random();
+        if(cliente.ClasseSociale == TipoClasse.Bassa)
+        {
+            int scelta = rand.Next(0, 3);
+            if (scelta < 2) return true;
+        }
+        else
+        {
+            int scelta = rand.Next(0, 5);
+            if (scelta < 2) return true;
+        }
+
+        return false;
+
     }
 }
