@@ -1,0 +1,14 @@
+C:\Users\utente\Documents\TheMerchant\TheMerchant\bin\Debug\net10.0\TheMerchant.exe
+C:\Users\utente\Documents\TheMerchant\TheMerchant\bin\Debug\net10.0\TheMerchant.deps.json
+C:\Users\utente\Documents\TheMerchant\TheMerchant\bin\Debug\net10.0\TheMerchant.runtimeconfig.json
+C:\Users\utente\Documents\TheMerchant\TheMerchant\bin\Debug\net10.0\TheMerchant.dll
+C:\Users\utente\Documents\TheMerchant\TheMerchant\bin\Debug\net10.0\TheMerchant.pdb
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.AssemblyInfoInputs.cache
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.AssemblyInfo.cs
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.csproj.CoreCompileInputs.cache
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.dll
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\refint\TheMerchant.dll
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.pdb
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\TheMerchant.genruntimeconfig.cache
+C:\Users\utente\Documents\TheMerchant\TheMerchant\obj\Debug\net10.0\ref\TheMerchant.dll
