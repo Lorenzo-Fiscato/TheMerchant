@@ -10,6 +10,7 @@ public class Citta
     public List<Cliente> Clienti { get; set; } = new List<Cliente>();
     public Evento EventoInCorso { get; set; } = Evento.Nessuno;
 
+    //funzione per creare un cliente con caratteristiche casuali e un prodotto desiderato basato sulla classe sociale
     public void CreaCliente()
     {
         Random rand = new Random();
@@ -30,7 +31,7 @@ public class Citta
             int scelta = rand.Next(0, 5);
             if (scelta < 2) cliente.ProdottoDesiderato = ScegliProdotto(cliente);
         }
-        
+
         Clienti.Add(cliente);
 
         Console.WriteLine($"Nuovo cliente: Sesso: {(cliente.Sesso ? "Maschio" : "Femmina")}, Classe Sociale: {cliente.ClasseSociale}, Pazienza: {cliente.Pazienza}, Prodotto Desiderato: {(cliente.ProdottoDesiderato.HasValue ? cliente.ProdottoDesiderato.Value.Item1.Nome : "Nessuno")}");
