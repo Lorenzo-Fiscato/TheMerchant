@@ -41,6 +41,7 @@ public class Citta
     private (Prodotto, int)? ScegliProdotto(Cliente cliente)
     {
         Random rand = new Random();
+        //la classe sociale bassa sceglie sicuramente un prodotto
         if(cliente.ClasseSociale == TipoClasse.Bassa)
         {
             var prodottoScelto = Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == TipoClasse.Bassa).Select(p => p.Key).ToList();
@@ -61,6 +62,7 @@ public class Citta
             return null;
     
         }
+        //la classe sociale media sceglie un prodotto con una certa probabilità, preferendo quelli carenti
         if(cliente.ClasseSociale == TipoClasse.Media)
         {
             var prodottoScelto = Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == TipoClasse.Media).Select(p => p.Key).ToList();
@@ -84,6 +86,7 @@ public class Citta
 
             return null;
         }
+        //la classe sociale alta sceglie un prodotto sicuramente(essendo rari) e senza preferenze particolari
         else{
 
             var prodottoScelto = Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == TipoClasse.Alta).Select(p => p.Key).ToList();
