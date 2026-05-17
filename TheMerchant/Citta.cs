@@ -18,7 +18,7 @@ public class Citta
         {
             Sesso = rand.Next(0, 2) == 0,
             ClasseSociale = (TipoClasse)rand.Next(0, 3),
-            Pazienza = 1f, //pazienza minima
+            Pazienza = 1, //pazienza minima
             ProdottoDesiderato = null 
         };
 
@@ -34,19 +34,21 @@ public class Citta
     private (Prodotto, int)? ScegliProdotto(Cliente cliente)
     {
         Random rand = new Random();
-        //la classe sociale bassa sceglie sicuramente un prodotto
-        if(cliente.ClasseSociale == TipoClasse.Bassa)
-        {
-            var prodottoScelto = Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == TipoClasse.Bassa).Select(p => p.Key).ToList();
-            
-            if (!prodottoScelto.Any()) return null;
 
-            var tuttiProdotti = Abbondante.Keys
+        List<Prodotto> prodottiPossibili = prodottiScelti(cliente.ClasseSociale);
+
+        var tuttiProdotti = Abbondante.Keys
             .Concat(Carente.Keys)
             .Distinct();
 
+        //la classe sociale bassa sceglie sicuramente un prodotto
+        if(cliente.ClasseSociale == TipoClasse.Bassa)
+        {
+            
+            if (!prodottiPossibili.Any()) return null;
+
             var opzioniDisponibili = tuttiProdotti
-            .Where(p => prodottoScelto.Contains(p))
+            .Where(p => prodottiPossibili.Contains(p))
             .ToList();
 
 
@@ -58,23 +60,20 @@ public class Citta
         //la classe sociale media sceglie un prodotto con una certa probabilità, preferendo quelli carenti
         if(cliente.ClasseSociale == TipoClasse.Media)
         {
-            var prodottoScelto = Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == TipoClasse.Media).Select(p => p.Key).ToList();
+           
             
-            if (!prodottoScelto.Any()) return null;
+            if (!prodottiPossibili.Any()) return null;
 
-            var tuttiProdotti = Abbondante.Keys
-            .Concat(Carente.Keys)
-            .Distinct();
 
             var opzioniDisponibili = tuttiProdotti
-            .Where(p => prodottoScelto.Contains(p))
+            .Where(p => prodottiPossibili.Contains(p))
             .ToList();
 
             if (Carente.Keys.Any(k => opzioniDisponibili.Contains(k))) return ScegliProdottoRandom(opzioniDisponibili);
             else if (Abbondante.Keys.Any(k => opzioniDisponibili.Contains(k)))
             {
                 int scelta = rand.Next(0, 10);
-                if (scelta < 4) return ScegliProdottoRandom(opzioniDisponibili);
+                if (scelta < 4 * Stima) return ScegliProdottoRandom(opzioniDisponibili);
             }
 
             return null;
@@ -82,16 +81,11 @@ public class Citta
         //la classe sociale alta sceglie un prodotto sicuramente(essendo rari) e senza preferenze particolari
         else{
 
-            var prodottoScelto = Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == TipoClasse.Alta).Select(p => p.Key).ToList();
             
-            if (!prodottoScelto.Any()) return null;
-
-            var tuttiProdotti = Abbondante.Keys
-            .Concat(Carente.Keys)
-            .Distinct();
+            if (!prodottiPossibili.Any()) return null;
 
             var opzioniDisponibili = tuttiProdotti
-            .Where(p => prodottoScelto.Contains(p))
+            .Where(p => prodottiPossibili.Contains(p))
             .ToList();
 
 
@@ -102,6 +96,8 @@ public class Citta
 
 
     }
+
+    private Func<TipoClasse, List<Prodotto>> prodottiScelti = t => Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == t).Select(p => p.Key).ToList();
 
     private (Prodotto, int) ScegliProdottoRandom(List<Prodotto> opzioni)
     {
@@ -131,12 +127,12 @@ public class Citta
         if(cliente.ClasseSociale == TipoClasse.Bassa)
         {
             int scelta = rand.Next(0, 3);
-            if (scelta < 2) return true;
+            if (scelta < 2 * Stima) return true;
         }
         else
         {
             int scelta = rand.Next(0, 5);
-            if (scelta < 2) return true;
+            if (scelta < 2 * Stima) return true;
         }
 
         return false;

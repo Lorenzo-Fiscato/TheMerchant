@@ -27,7 +27,7 @@ Prodotto collana = new Prodotto
 };
 Citta start = new Citta
 {
-    Stima = 0,
+    Stima = 1,
     Abbondante = new Dictionary<Prodotto, int>
     {
         { pane, 5 },
@@ -48,6 +48,14 @@ Disponibili.Prodotti.Add(pane, (5, 5));
 Disponibili.Prodotti.Add(vino, (10, 11));
 Disponibili.Prodotti.Add(grano, (50, 3));
 Disponibili.Prodotti.Add(collana, (1, 100));
+for (int i = 0; i < 20; i++)
+{
+    start.CreaCliente();
+}
+
+Console.WriteLine();
+start.Stima = 2;
+
 for (int i = 0; i < 20; i++)
 {
     start.CreaCliente();
