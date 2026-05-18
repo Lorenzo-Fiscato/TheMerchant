@@ -1,115 +1,87 @@
 using System.Diagnostics.Tracing;
+using System.Net;
 using System.Runtime.CompilerServices;
 
 public class Citta
 {
 
     public float Stima { get; set; }
-    public Dictionary<Prodotto, int> Abbondante { get; set; } = new Dictionary<Prodotto, int>();
-    public Dictionary<Prodotto, int> Carente { get; set; } = new Dictionary<Prodotto, int>();
+    public Dictionary<Prodotto, double> AbbondanteInCitta { get; set; } = new Dictionary<Prodotto, double>();
+    public Dictionary<Prodotto, double> Prodotti { get; set; } = new Dictionary<Prodotto, double>();
     public List<Cliente> Clienti { get; set; } = new List<Cliente>();
     public Evento EventoInCorso { get; set; } = Evento.Nessuno;
+
+    private Random rand = new Random();
 
     //funzione per creare un cliente con caratteristiche casuali e un prodotto desiderato basato sulla classe sociale
     public void CreaCliente()
     {
-        Random rand = new Random();
         Cliente cliente = new Cliente
         {
             Sesso = rand.Next(0, 2) == 0,
-            ClasseSociale = (TipoClasse)rand.Next(0, 3),
+            ClasseSociale = scegliClasseSociale,
             Pazienza = 1, //pazienza minima
-            ProdottoDesiderato = null 
         };
 
         cliente.Pazienza = scegliPazienza(cliente);
-        if(scegliSeComprare(cliente)) cliente.ProdottoDesiderato = ScegliProdotto(cliente);
-         
+        
+        if((cliente.ProdottoDesiderato = ScegliProdotto(cliente)) != null)
+            if(!scegliSeComprare(cliente)) cliente.ProdottoDesiderato = null;
+
         Clienti.Add(cliente);
 
         Console.WriteLine($"Nuovo cliente: Sesso: {(cliente.Sesso ? "Maschio" : "Femmina")}, Classe Sociale: {cliente.ClasseSociale}, Pazienza: {cliente.Pazienza}, Prodotto Desiderato: {(cliente.ProdottoDesiderato.HasValue ? cliente.ProdottoDesiderato.Value.Item1.Nome : "Nessuno")}");
     }
 
     //funzione per scegliere un prodotto desiderato in base alla classe sociale del cliente e alla disponibilità dei prodotti
-    private (Prodotto, int)? ScegliProdotto(Cliente cliente)
+    private (Prodotto, double)? ScegliProdotto(Cliente cliente)
     {
-        Random rand = new Random();
 
-        List<Prodotto> prodottiPossibili = prodottiScelti(cliente.ClasseSociale);
+    //ottiene una lista dei prodotti che il cliente può comprare tra quelli disponibili
+    List<Prodotto> prodottiPossibili = prodottiScelti(cliente.ClasseSociale);
 
-        var tuttiProdotti = Abbondante.Keys
-            .Concat(Carente.Keys)
-            .Distinct();
+    if(!prodottiPossibili.Any()) return null;
 
-        //la classe sociale bassa sceglie sicuramente un prodotto
-        if(cliente.ClasseSociale == TipoClasse.Bassa)
+    //sceglie un prodotto random tra quelli disponibili
+    var prodottoRand = ScegliProdottoRandom(prodottiPossibili);
+
+
+    //la classe sociale bassa o ricca sceglie sicuramente un prodotto
+    if(cliente.ClasseSociale == TipoClasse.Bassa ||  cliente.ClasseSociale == TipoClasse.Alta) return prodottoRand;
+
+    //la classe sociale media sceglie un prodotto con una certa probabilità, preferendo quelli che scarseggianoo in città
+    else
+    {
+        //se sono presenti prodotti che scarseggiano in città compra sicuramente
+        if (!AbbondanteInCitta.Keys.Any(k => prodottiPossibili.Contains(k))) return ScegliProdottoRandom(prodottiPossibili);
+        //altrimenti compra con una probabilità che dipende dalla stima della città
+        else
         {
-            
-            if (!prodottiPossibili.Any()) return null;
-
-            var opzioniDisponibili = tuttiProdotti
-            .Where(p => prodottiPossibili.Contains(p))
-            .ToList();
-
-
-            if (opzioniDisponibili.Any()) return ScegliProdottoRandom(opzioniDisponibili);
-
-            return null;
-    
+            double scelta = rand.NextDouble() * 4;
+            if (scelta < 1 * Stima * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].ProbComprare) return prodottoRand;
         }
-        //la classe sociale media sceglie un prodotto con una certa probabilità, preferendo quelli carenti
-        if(cliente.ClasseSociale == TipoClasse.Media)
-        {
-           
-            
-            if (!prodottiPossibili.Any()) return null;
-
-
-            var opzioniDisponibili = tuttiProdotti
-            .Where(p => prodottiPossibili.Contains(p))
-            .ToList();
-
-            if (Carente.Keys.Any(k => opzioniDisponibili.Contains(k))) return ScegliProdottoRandom(opzioniDisponibili);
-            else if (Abbondante.Keys.Any(k => opzioniDisponibili.Contains(k)))
-            {
-                int scelta = rand.Next(0, 10);
-                if (scelta < 4 * Stima) return ScegliProdottoRandom(opzioniDisponibili);
-            }
-
-            return null;
-        }
-        //la classe sociale alta sceglie un prodotto sicuramente(essendo rari) e senza preferenze particolari
-        else{
-
-            
-            if (!prodottiPossibili.Any()) return null;
-
-            var opzioniDisponibili = tuttiProdotti
-            .Where(p => prodottiPossibili.Contains(p))
-            .ToList();
-
-
-            if (opzioniDisponibili.Any()) return ScegliProdottoRandom(opzioniDisponibili);
-
-            return null;
-        }
-
 
     }
 
-    private Func<TipoClasse, List<Prodotto>> prodottiScelti = t => Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == t).Select(p => p.Key).ToList();
+    return null;
+}
 
-    private (Prodotto, int) ScegliProdottoRandom(List<Prodotto> opzioni)
+    //Func che ritorna prodotti corrispondenti alla classe tra i prodotti disponibili
+    private Func<TipoClasse, List<Prodotto>> prodottiScelti = c => Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == c).Select(p => p.Key).ToList();
+
+
+    //ritorna un elemento random tra quelli possibili
+    private (Prodotto, double) ScegliProdottoRandom(List<Prodotto> opzioni)
     {
-        Random rand = new Random();
         int indiceCasuale = rand.Next(opzioni.Count);
-        Prodotto prodottoTrovato= opzioni[indiceCasuale];
-        return (prodottoTrovato, 1);
+        Prodotto prodottoTrovato = opzioni[indiceCasuale];
+        
+        return (prodottoTrovato, Prodotti[prodottoTrovato] * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].Prezzo);
     }
 
-    private float scegliPazienza(Cliente cliente)
+    //funzione per scegliere la pazienza del cliente in base alla classe sociale, con un po' di casualità
+    private double scegliPazienza(Cliente cliente)
     {
-        Random rand = new Random();
         double calcolo = cliente.Pazienza;
 
         if(cliente.ClasseSociale == TipoClasse.Bassa)
@@ -118,24 +90,36 @@ public class Citta
             calcolo += rand.NextDouble() * 0.5 + 0.25; //aggiunge pazienza tra 0.25 e 0.75
         else
             calcolo += rand.NextDouble() * 0.5; //aggiunge pazienza tra 0 e 0.5
-        return (float)Math.Round(calcolo, 2);
+        return Math.Round(calcolo + ConfigurazioneEventi.Moltiplicatori[EventoInCorso].Pazienza, 2);
     }
 
+    //funzione per decidere se il cliente compra un prodotto
     private bool scegliSeComprare(Cliente cliente)
     {
-        Random rand = new Random();
         if(cliente.ClasseSociale == TipoClasse.Bassa)
         {
-            int scelta = rand.Next(0, 3);
-            if (scelta < 2 * Stima) return true;
+            double scelta = rand.NextDouble() * 3;
+            if (scelta < 1.5 * Stima * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].ProbComprare) return true;
         }
         else
         {
-            int scelta = rand.Next(0, 5);
-            if (scelta < 2 * Stima) return true;
+            double scelta = rand.NextDouble() * 5;
+            if (scelta < 2 * Stima * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].ProbComprare) return true;
         }
 
         return false;
 
+    }
+
+    //funzione per scegliere la classe sociale del cliente con una certa distribuzione
+    private TipoClasse scegliClasseSociale
+    {
+        get
+        {
+            int scelta = rand.Next(0, 100);
+            if(scelta < 20) return TipoClasse.Bassa; //20% di probabilità
+            else if(scelta < 80) return TipoClasse.Media; //60% di probabilità
+            else return TipoClasse.Alta; //20% di probabilità
+        }
     }
 }

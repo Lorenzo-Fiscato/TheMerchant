@@ -2,41 +2,48 @@
 {
     Nome = "Pane",
     ClasseSociale = TipoClasse.Bassa,
-    Stackable = true
+    Stackable = true,
+    TolleranzaPrezzo = 1.2
 };
 
 Prodotto grano = new Prodotto
 {
     Nome = "Grano",
     ClasseSociale = TipoClasse.Bassa,
-    Stackable = true
+    Stackable = true,
+    TolleranzaPrezzo = 1.2
 };
 
 Prodotto vino = new Prodotto
 {
     Nome = "Vino",
     ClasseSociale = TipoClasse.Media,
-    Stackable = true
+    Stackable = true,
+    TolleranzaPrezzo = 1.1
 };
 
 Prodotto collana = new Prodotto
 {
     Nome = "Collana",
     ClasseSociale = TipoClasse.Alta,
-    Stackable = false
+    Stackable = false,
+    TolleranzaPrezzo = 1.05
 };
 Citta start = new Citta
 {
     Stima = 1,
-    Abbondante = new Dictionary<Prodotto, int>
+    AbbondanteInCitta = new Dictionary<Prodotto, double>
     {
         { pane, 5 },
         { vino, 10 },
         { grano, 2 }
     },
-    Carente = new Dictionary<Prodotto, int>
+    Prodotti = new Dictionary<Prodotto, double>
     {
-        { collana, 100 }
+        { collana, 100 },
+        { pane, 5 },
+        { vino, 11 },
+        { grano, 3 }
     },
 };
 
