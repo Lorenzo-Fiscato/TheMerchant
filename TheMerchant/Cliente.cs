@@ -52,7 +52,7 @@ public class Cliente
 
     private void ModificaStima(float prezzoVendita, float prezzoCliente)
     {
-        cittaAppartenenza.Stima += (float)Math.Round((1 - prezzoVendita / prezzoCliente) / 10 + Pazienza / 100, 2);
+        cittaAppartenenza.Stima += (float)Math.Round((1 - prezzoVendita / prezzoCliente) + Pazienza / 100, 2);
         Console.WriteLine($"La stima della città è ora: {cittaAppartenenza.Stima}");
     }
 
@@ -78,6 +78,9 @@ public class Cliente
 
     private void ProponiOfferta(float prezzoVendita, float prezzoCliente)
     {
+        float prezzoAttualeCliente = prezzoCliente;
+        double fattoreAvvicinamento = Math.Clamp((Pazienza * cittaAppartenenza.Stima) + rand.NextDouble() * 0.25, 0.5, 0.8);
+        prezzoCliente = (float)Math.Round(prezzoVendita * fattoreAvvicinamento, 2);
         float prezzoAttuale = prezzoVendita;
 
         while (Pazienza > 0)
@@ -85,8 +88,6 @@ public class Cliente
             nOfferte++;
             
             // Il cliente formula l'offerta basandosi sulla sua pazienza attuale
-            double fattoreAvvicinamento = Math.Clamp((Pazienza * cittaAppartenenza.Stima) / 10, 0.1, 0.5);
-            prezzoCliente = (float)Math.Round(prezzoCliente + (prezzoAttuale - prezzoCliente) * fattoreAvvicinamento, 2);
 
             Console.WriteLine($"\n[Turno {nOfferte}] Il cliente offre: {prezzoCliente} (Pazienza: {Pazienza})");
             Console.WriteLine("Scegli come rispondere:");
@@ -107,7 +108,7 @@ public class Cliente
             {
                 Console.WriteLine("Trattativa interrotta. Il cliente se ne va.");
                 Pazienza = 0;
-                ModificaStima(prezzoAttuale, prezzoCliente);
+                ModificaStima(prezzoAttuale, prezzoAttualeCliente);
                 return;
             }
 
@@ -136,7 +137,7 @@ public class Cliente
             if (Contratta(prezzoCliente, prezzoAttuale))
             {
                 Console.WriteLine($"Il cliente ha accettato la tua controofferta di {prezzoAttuale}!");
-                ModificaStima(prezzoAttuale, ProdottoDesiderato.Value.PrezzoMedio);
+                ModificaStima(prezzoCliente, prezzoAttuale);
                 ModificaSoldi(prezzoAttuale);
                 return;
             }
@@ -148,12 +149,14 @@ public class Cliente
             if (Pazienza <= 0)
             {
                 Console.WriteLine("Il cliente ha perso la pazienza ed è uscito dal negozio!");
-                ModificaStima(prezzoAttuale, ProdottoDesiderato.Value.PrezzoMedio);
+                ModificaStima(prezzoAttuale, prezzoCliente);
                 return;
             }
 
             // Il prezzo attuale diventa il nuovo tetto massimo per il prossimo calcolo
             prezzoVendita = prezzoAttuale;
+            fattoreAvvicinamento = Math.Clamp((Pazienza * cittaAppartenenza.Stima)  + rand.NextDouble() * 0.25, 0.3, 0.6);
+            prezzoAttualeCliente = prezzoCliente = (float)Math.Round(prezzoCliente + (prezzoAttuale - prezzoCliente) * fattoreAvvicinamento, 2);
         }
     }
 
