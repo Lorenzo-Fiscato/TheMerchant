@@ -6,8 +6,8 @@ public class Citta
 {
 
     public float Stima { get; set; }
-    public Dictionary<Prodotto, double> AbbondanteInCitta { get; set; } = new Dictionary<Prodotto, double>();
-    public Dictionary<Prodotto, double> Prodotti { get; set; } = new Dictionary<Prodotto, double>();
+    public Dictionary<Prodotto, float> AbbondanteInCitta { get; set; } = new Dictionary<Prodotto, float>();
+    public Dictionary<Prodotto, float> Prodotti { get; set; } = new Dictionary<Prodotto, float>();
     public List<Cliente> Clienti { get; set; } = new List<Cliente>();
     public Evento EventoInCorso { get; set; } = Evento.Nessuno;
 
@@ -34,7 +34,7 @@ public class Citta
     }
 
     //funzione per scegliere un prodotto desiderato in base alla classe sociale del cliente e alla disponibilità dei prodotti
-    private (Prodotto, double)? ScegliProdotto(Cliente cliente)
+    private (Prodotto, float)? ScegliProdotto(Cliente cliente)
     {
 
     //ottiene una lista dei prodotti che il cliente può comprare tra quelli disponibili
@@ -49,18 +49,22 @@ public class Citta
     //la classe sociale bassa o ricca sceglie sicuramente un prodotto
     if(cliente.ClasseSociale == TipoClasse.Bassa ||  cliente.ClasseSociale == TipoClasse.Alta) return prodottoRand;
 
-    //la classe sociale media sceglie un prodotto con una certa probabilità, preferendo quelli che scarseggianoo in città
+    //la classe sociale media sceglie un prodotto con una certa probabilità, preferendo quelli che scarseggiano in città
     else
     {
-        //se sono presenti prodotti che scarseggiano in città compra sicuramente
-        if (!AbbondanteInCitta.Keys.Any(k => prodottiPossibili.Contains(k))) return ScegliProdottoRandom(prodottiPossibili);
-        //altrimenti compra con una probabilità che dipende dalla stima della città
+        // Separiamo i prodotti scarsi da quelli abbondanti presenti in questa selezione
+        var opzioniScarse = prodottiPossibili.Where(p => !AbbondanteInCitta.ContainsKey(p)).ToList();
+
+        if (opzioniScarse.Any())
+            // Se ci sono opzioni scarse in vetrina, la classe media preferisce quelle e compra sicuro!
+            return ScegliProdottoRandom(opzioniScarse);
         else
         {
-            double scelta = rand.NextDouble() * 4;
-            if (scelta < 1 * Stima * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].ProbComprare) return prodottoRand;
+        // Se in vetrina ci sono SOLO oggetti abbondanti, allora tentiamo l'acquisto con la probabilità
+        double scelta = rand.NextDouble() * 4;
+        if (scelta < 1.5 * Stima * ConfigurazioneEventi.ModificatoreProbComprare[EventoInCorso][prodottoRand.Item1.Tag])
+            return prodottoRand;
         }
-
     }
 
     return null;
@@ -71,16 +75,25 @@ public class Citta
 
 
     //ritorna un elemento random tra quelli possibili
-    private (Prodotto, double) ScegliProdottoRandom(List<Prodotto> opzioni)
+    private (Prodotto, float) ScegliProdottoRandom(List<Prodotto> opzioni)
     {
         int indiceCasuale = rand.Next(opzioni.Count);
         Prodotto prodottoTrovato = opzioni[indiceCasuale];
+    
+        // Se il prodotto è abbondante in città, prendiamo il suo prezzo scontato,
+        // altrimenti prendiamo il prezzo standard dal dizionario globale dei prodotti
+        float prezzoBaseLocale = AbbondanteInCitta.ContainsKey(prodottoTrovato) 
+            ? AbbondanteInCitta[prodottoTrovato] 
+            : Prodotti[prodottoTrovato];
         
-        return (prodottoTrovato, Prodotti[prodottoTrovato] * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].Prezzo);
+        // Applichiamo il modificatore dell'evento basato sul Tag
+        float prezzoFinale = prezzoBaseLocale * ConfigurazioneEventi.ModificatorePrezzo[EventoInCorso][prodottoTrovato.Tag];
+    
+        return (prodottoTrovato, (float)Math.Round(prezzoFinale, 2));
     }
 
     //funzione per scegliere la pazienza del cliente in base alla classe sociale, con un po' di casualità
-    private double scegliPazienza(Cliente cliente)
+    private float scegliPazienza(Cliente cliente)
     {
         double calcolo = cliente.Pazienza;
 
@@ -90,22 +103,15 @@ public class Citta
             calcolo += rand.NextDouble() * 0.5 + 0.25; //aggiunge pazienza tra 0.25 e 0.75
         else
             calcolo += rand.NextDouble() * 0.5; //aggiunge pazienza tra 0 e 0.5
-        return Math.Round(calcolo + ConfigurazioneEventi.Moltiplicatori[EventoInCorso].Pazienza, 2);
+        return (float)Math.Round(calcolo * ConfigurazioneEventi.ModificatorePazienza[EventoInCorso], 2);
     }
 
     //funzione per decidere se il cliente compra un prodotto
     private bool scegliSeComprare(Cliente cliente)
     {
-        if(cliente.ClasseSociale == TipoClasse.Bassa)
-        {
-            double scelta = rand.NextDouble() * 3;
-            if (scelta < 1.5 * Stima * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].ProbComprare) return true;
-        }
-        else
-        {
-            double scelta = rand.NextDouble() * 5;
-            if (scelta < 2 * Stima * ConfigurazioneEventi.Moltiplicatori[EventoInCorso].ProbComprare) return true;
-        }
+        double scelta = rand.NextDouble() * (cliente.ClasseSociale == TipoClasse.Bassa ? 3 : 4);
+
+        if (scelta < 1.5 * Stima * ConfigurazioneEventi.ModificatoreProbComprare[EventoInCorso][cliente.ProdottoDesiderato.Value.Item1.Tag]) return true;
 
         return false;
 

@@ -1,13 +1,120 @@
 public static class ConfigurazioneEventi
 {
     // Mappa ogni evento al suo moltiplicatore dei prezzi locali
-    public static Dictionary<Evento, (double Prezzo, double Pazienza, double ProbComprare)> Moltiplicatori =
-     new Dictionary<Evento, (double Prezzo, double Pazienza, double ProbComprare)>()
+    public static Dictionary<Evento, Dictionary<TagProdotto, float>> ModificatorePrezzo { get; } = new Dictionary<Evento, Dictionary<TagProdotto, float>>()
     {
-        { Evento.Nessuno, (1.0, 0.0, 1.0) }, // Nessun evento, prezzi normali, pazienza normale, probabilità normale di comprare
-        { Evento.Festa, (1.1, 0.2, 1.2) }, // I prezzi aumentano del 10%, i clienti sono più pazienti e più propensi a comprare
-        { Evento.Carestia, (2.5, -0.5, 0.5) }, // I prezzi raddoppiano, i clienti sono meno pazienti e meno propensi a comprare
-        { Evento.Epidemia, (1.8, -0.8, 0.8) }, // I prezzi aumentano del 80%, i clienti sono molto meno pazienti e meno propensi a comprare
-        { Evento.Guerra, (3.0, -0.5, 0.5) } // I prezzi triplicano, i clienti sono meno pazienti e meno propensi a comprare
+        {Evento.Nessuno, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.0f },
+                { TagProdotto.CiboPovero, 1.0f },
+                { TagProdotto.CiboRicco, 1.0f },
+                { TagProdotto.Materiale, 1.0f },
+                { TagProdotto.Armamento, 1.0f },
+                { TagProdotto.Lusso, 1.0f }
+            })
+        },
+        { Evento.Festa, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 0.9f },
+                { TagProdotto.CiboPovero, 0.8f },
+                { TagProdotto.CiboRicco, 0.95f },
+                { TagProdotto.Materiale, 1.0f },
+                { TagProdotto.Armamento, 1.0f },
+                { TagProdotto.Lusso, 1.2f }
+            })
+        },
+        { Evento.Carestia, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.5f },
+                { TagProdotto.CiboPovero, 1.4f },
+                { TagProdotto.CiboRicco, 1.3f },
+                { TagProdotto.Materiale, 1.0f },
+                { TagProdotto.Armamento, 1.0f },
+                { TagProdotto.Lusso, 0.9f }
+            })
+        },
+        { Evento.Epidemia, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.2f },
+                { TagProdotto.CiboPovero, 1.1f },
+                { TagProdotto.CiboRicco, 1.0f },
+                { TagProdotto.Materiale, 0.9f },
+                { TagProdotto.Armamento, 0.9f },
+                { TagProdotto.Lusso, 0.8f }
+            })
+        },
+        { Evento.Guerra, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.3f },
+                { TagProdotto.CiboPovero, 1.2f },
+                { TagProdotto.CiboRicco, 1.1f },
+                { TagProdotto.Materiale, 1.5f },
+                { TagProdotto.Armamento, 2.0f },
+                { TagProdotto.Lusso, 0.8f }
+            })  
+        }
+    };
+
+    public static Dictionary<Evento, float> ModificatorePazienza { get; } = new Dictionary<Evento, float>()
+    {
+        {Evento.Nessuno, 1.0f },
+        { Evento.Festa, 1.2f },
+        { Evento.Carestia, 0.8f },
+        { Evento.Epidemia, 0.9f },
+        { Evento.Guerra, 0.7f }
+    };
+
+        public static Dictionary<Evento, Dictionary<TagProdotto, float>> ModificatoreProbComprare { get; } = new Dictionary<Evento, Dictionary<TagProdotto, float>>()
+    {
+        {Evento.Nessuno, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.0f },
+                { TagProdotto.CiboPovero, 1.0f },
+                { TagProdotto.CiboRicco, 1.0f },
+                { TagProdotto.Materiale, 1.0f },
+                { TagProdotto.Armamento, 1.0f },
+                { TagProdotto.Lusso, 1.0f }
+            })
+        },
+        { Evento.Festa, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.0f },
+                { TagProdotto.CiboPovero, 1.0f },
+                { TagProdotto.CiboRicco, 1.2f },
+                { TagProdotto.Materiale, 1.0f },
+                { TagProdotto.Armamento, 1.0f },
+                { TagProdotto.Lusso, 1.2f }
+            })
+        },
+        { Evento.Carestia, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 2.0f },
+                { TagProdotto.CiboPovero, 2.0f },
+                { TagProdotto.CiboRicco, 1.2f },
+                { TagProdotto.Materiale, 1.0f },
+                { TagProdotto.Armamento, 0.8f },
+                { TagProdotto.Lusso, 0.8f }
+            })
+        },
+        { Evento.Epidemia, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.3f },
+                { TagProdotto.CiboPovero, 1.2f },
+                { TagProdotto.CiboRicco, 1.0f },
+                { TagProdotto.Materiale, 1.0f },
+                { TagProdotto.Armamento, 0.7f },
+                { TagProdotto.Lusso, 0.8f }
+            })
+        },
+        { Evento.Guerra, (new Dictionary<TagProdotto, float>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 1.3f },
+                { TagProdotto.CiboPovero, 1.2f },
+                { TagProdotto.CiboRicco, 1.1f },
+                { TagProdotto.Materiale, 1.2f },
+                { TagProdotto.Armamento, 2.0f },
+                { TagProdotto.Lusso, 0.8f }
+            })  
+        }
     };
 }
