@@ -62,7 +62,7 @@ Citta start = new Citta
     },
     Prodotti = new Dictionary<Prodotto, float>
     {
-        { collana, 100 },
+        {collana, 200 },
         { pane, 5 },
         { vino, 11 },
         { grano, 3 },
@@ -77,8 +77,8 @@ Inventario.Prodotti.Add(collana, 1);
 
 Disponibili.Prodotti.Add(pane, (5, 5));
 Disponibili.Prodotti.Add(vino, (10, 11));
+Disponibili.Prodotti.Add(collana, (1, 200));
 Disponibili.Prodotti.Add(grano, (50, 3));
-Disponibili.Prodotti.Add(collana, (1, 100));
 Disponibili.Prodotti.Add(farina, (20, 4));
 Disponibili.Prodotti.Add(legno, (15, 6));
 for (int i = 0; i < 20; i++)
@@ -87,12 +87,8 @@ for (int i = 0; i < 20; i++)
 }
 
 Console.WriteLine();
-start.Stima = 2;
 
-for (int i = 0; i < 20; i++)
-{
-    start.CreaCliente();
-}
+start.Clienti.First().Acquista(202);
 
 
 

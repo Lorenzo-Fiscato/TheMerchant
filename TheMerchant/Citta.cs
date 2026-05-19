@@ -18,15 +18,17 @@ public class Citta
     {
         Cliente cliente = new Cliente
         {
+            cittaAppartenenza = this,
             Sesso = rand.Next(0, 2) == 0,
             ClasseSociale = scegliClasseSociale,
-            Pazienza = 1, //pazienza minima
+            Pazienza = 0.5f, //pazienza minima
         };
 
         cliente.Pazienza = scegliPazienza(cliente);
         
         if((cliente.ProdottoDesiderato = ScegliProdotto(cliente)) != null)
             if(!scegliSeComprare(cliente)) cliente.ProdottoDesiderato = null;
+            cliente.ProdottoDesiderato = (Prodotti.First().Key, Prodotti[Prodotti.First().Key]);
 
         Clienti.Add(cliente);
 
@@ -98,11 +100,11 @@ public class Citta
         double calcolo = cliente.Pazienza;
 
         if(cliente.ClasseSociale == TipoClasse.Bassa)
-            calcolo += rand.NextDouble() * 1 + 0.5; //aggiunge pazienza tra 0.5 e 1.5
-        else if(cliente.ClasseSociale == TipoClasse.Media)
             calcolo += rand.NextDouble() * 0.5 + 0.25; //aggiunge pazienza tra 0.25 e 0.75
+        else if(cliente.ClasseSociale == TipoClasse.Media)
+            calcolo += rand.NextDouble() * 0.25 + 0.125; //aggiunge pazienza tra 0.125 e 0.375
         else
-            calcolo += rand.NextDouble() * 0.5; //aggiunge pazienza tra 0 e 0.5
+            calcolo += rand.NextDouble() * 0.25; //aggiunge pazienza tra 0 e 0.25
         return (float)Math.Round(calcolo * ConfigurazioneEventi.ModificatorePazienza[EventoInCorso], 2);
     }
 
