@@ -27,7 +27,7 @@ public class Citta
 
         cliente.Pazienza = scegliPazienza(cliente);
         
-        if((cliente.ProdottoDesiderato = ScegliProdotto(cliente)) != null)
+        if((cliente.ProdottoDesiderato = scegliProdotto(cliente)) != null)
             if(!scegliSeComprare(cliente)) cliente.ProdottoDesiderato = null;
 
         Clienti.Add(cliente);
@@ -36,16 +36,16 @@ public class Citta
     }
 
     //funzione per scegliere un prodotto desiderato in base alla classe sociale del cliente e alla disponibilità dei prodotti
-    private (Prodotto, float)? ScegliProdotto(Cliente cliente)
+    private (Prodotto, float)? scegliProdotto(Cliente cliente)
     {
 
     //ottiene una lista dei prodotti che il cliente può comprare tra quelli disponibili
-    List<Prodotto> prodottiPossibili = prodottiScelti(cliente.ClasseSociale);
+    List<Prodotto> prodottiPossibili = GetProdottiPerClasse(cliente.ClasseSociale);
 
     if(!prodottiPossibili.Any()) return null;
 
     //sceglie un prodotto random tra quelli disponibili
-    var prodottoRand = ScegliProdottoRandom(prodottiPossibili);
+    var prodottoRand = scegliProdottoRandom(prodottiPossibili);
 
 
     //la classe sociale bassa o ricca sceglie sicuramente un prodotto
@@ -59,7 +59,7 @@ public class Citta
 
         if (opzioniScarse.Any())
             // Se ci sono opzioni scarse in vetrina, la classe media preferisce quelle e compra sicuro!
-            return ScegliProdottoRandom(opzioniScarse);
+            return scegliProdottoRandom(opzioniScarse);
         else
         {
         // Se in vetrina ci sono SOLO oggetti abbondanti, allora tentiamo l'acquisto con la probabilità
@@ -72,12 +72,13 @@ public class Citta
     return null;
 }
 
-    //Func che ritorna prodotti corrispondenti alla classe tra i prodotti disponibili
-    private Func<TipoClasse, List<Prodotto>> prodottiScelti = c => Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == c).Select(p => p.Key).ToList();
+    //ritorna prodotti corrispondenti alla classe tra i prodotti disponibili
+    private List<Prodotto> GetProdottiPerClasse(TipoClasse classe) => 
+    Disponibili.Prodotti.Where(p => p.Key.ClasseSociale == classe).Select(p => p.Key).ToList();
 
 
     //ritorna un elemento random tra quelli possibili
-    private (Prodotto, float) ScegliProdottoRandom(List<Prodotto> opzioni)
+    private (Prodotto, float) scegliProdottoRandom(List<Prodotto> opzioni)
     {
         int indiceCasuale = rand.Next(opzioni.Count);
         Prodotto prodottoTrovato = opzioni[indiceCasuale];

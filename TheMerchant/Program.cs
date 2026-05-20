@@ -1,4 +1,6 @@
-﻿Prodotto pane = new Prodotto
+﻿using System.Globalization;
+
+Prodotto pane = new Prodotto
 {
     Nome = "Pane",
     ClasseSociale = TipoClasse.Bassa,
@@ -84,7 +86,7 @@ Disponibili.Prodotti.Add(legno, (15, 6));
 
 
 // --- CONFIGURAZIONE DELLA GIORNATA ---
-int clientiTotaliOggi = 5; // Quanti clienti totali passeranno oggi in bottega
+int clientiTotaliOggi = 20; // Quanti clienti totali passeranno oggi in bottega
 
 Console.WriteLine("=================================================================");
 Console.WriteLine($" APERTURA BOTTEGA - Stima iniziale della città: {start.Stima:F2}");
@@ -121,7 +123,7 @@ for (int i = 1; i <= clientiTotaliOggi; i++)
     
     // 5. Richiesta prezzo al giocatore
     Console.Write("\nA quale prezzo iniziale decidi di proporlo? ");
-    if (!float.TryParse(Console.ReadLine(), out float prezzoProposto))
+    if (!float.TryParse(Console.ReadLine(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out float prezzoProposto))
     {
         prezzoProposto = prezzoDiMercatoLocale; // Fallback di sicurezza
     }
