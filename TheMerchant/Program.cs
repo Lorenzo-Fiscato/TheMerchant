@@ -58,16 +58,16 @@ Citta start = new Citta
     {
         { pane, 5 },
         { vino, 10 },
-        { grano, 2 }
+        { grano, 3 }
     },
     Prodotti = new Dictionary<Prodotto, float>
     {
+        { grano, 3 },
         {collana, 200 },
         { pane, 5 },
         { vino, 11 },
-        { grano, 3 },
-        { farina, 4 },
-        { legno, 6 }
+        { farina, 4.2f },
+        { legno, 6.5f }
     },
 };
 
@@ -78,7 +78,7 @@ Inventario.Prodotti.Add(collana, 1);
 Disponibili.Prodotti.Add(pane, (5, 5));
 Disponibili.Prodotti.Add(vino, (10, 11));
 Disponibili.Prodotti.Add(collana, (1, 200));
-Disponibili.Prodotti.Add(grano, (50, 3));
+Disponibili.Prodotti.Add(grano, (50, 3.1f));
 Disponibili.Prodotti.Add(farina, (20, 4));
 Disponibili.Prodotti.Add(legno, (15, 6));
 for (int i = 0; i < 20; i++)
@@ -88,7 +88,10 @@ for (int i = 0; i < 20; i++)
 
 Console.WriteLine();
 
-start.Clienti.First().Acquista(202);
+Cliente cliente = start.Clienti.Last();
+if (cliente.ProdottoDesiderato.HasValue) cliente.Acquista(Disponibili.Prodotti.First(p =>  p.Key
+                                                        .Equals(cliente.ProdottoDesiderato.Value.Item1)).Value.Item2);
+
 
 
 

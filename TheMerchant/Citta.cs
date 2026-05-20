@@ -22,13 +22,14 @@ public class Citta
             Sesso = rand.Next(0, 2) == 0,
             ClasseSociale = scegliClasseSociale,
             Pazienza = 0.5f, //pazienza minima
+            Personalita = scegliPersonalita
         };
 
         cliente.Pazienza = scegliPazienza(cliente);
         
         if((cliente.ProdottoDesiderato = ScegliProdotto(cliente)) != null)
             if(!scegliSeComprare(cliente)) cliente.ProdottoDesiderato = null;
-            cliente.ProdottoDesiderato = (Prodotti.First().Key, Prodotti[Prodotti.First().Key]);
+        cliente.ProdottoDesiderato = (Prodotti.First().Key, Prodotti.First().Value);
 
         Clienti.Add(cliente);
 
@@ -100,11 +101,11 @@ public class Citta
         double calcolo = cliente.Pazienza;
 
         if(cliente.ClasseSociale == TipoClasse.Bassa)
-            calcolo += rand.NextDouble() * 0.5 + 0.25; //aggiunge pazienza tra 0.25 e 0.75
+            calcolo += rand.NextDouble() * 0.5 * ModificatoriPersonalita.ModificatorePazienza[cliente.Personalita] + 0.25; //aggiunge pazienza tra 0.25 e 0.75
         else if(cliente.ClasseSociale == TipoClasse.Media)
-            calcolo += rand.NextDouble() * 0.25 + 0.125; //aggiunge pazienza tra 0.125 e 0.375
+            calcolo += rand.NextDouble() * 0.25 * ModificatoriPersonalita.ModificatorePazienza[cliente.Personalita] + 0.125; //aggiunge pazienza tra 0.125 e 0.375
         else
-            calcolo += rand.NextDouble() * 0.25; //aggiunge pazienza tra 0 e 0.25
+            calcolo += rand.NextDouble() * 0.25 * ModificatoriPersonalita.ModificatorePazienza[cliente.Personalita]; //aggiunge pazienza tra 0 e 0.25
         return (float)Math.Round(calcolo * ConfigurazioneEventi.ModificatorePazienza[EventoInCorso], 2);
     }
 
@@ -128,6 +129,17 @@ public class Citta
             if(scelta < 20) return TipoClasse.Bassa; //20% di probabilità
             else if(scelta < 80) return TipoClasse.Media; //60% di probabilità
             else return TipoClasse.Alta; //20% di probabilità
+        }
+    }
+
+    private PersonalitaCliente scegliPersonalita
+    {
+        get
+        {
+            int scelta = rand.Next(0, 100);
+            if(scelta < 60) return PersonalitaCliente.Normale; //60% di probabilità
+            else if(scelta < 80) return PersonalitaCliente.Frettoloso; //20% di probabilità
+            else return PersonalitaCliente.Trattatore; //20% di probabilità
         }
     }
 }
