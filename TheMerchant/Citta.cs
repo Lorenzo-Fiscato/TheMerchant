@@ -29,7 +29,6 @@ public class Citta
         
         if((cliente.ProdottoDesiderato = ScegliProdotto(cliente)) != null)
             if(!scegliSeComprare(cliente)) cliente.ProdottoDesiderato = null;
-        cliente.ProdottoDesiderato = (Prodotti.First().Key, Prodotti.First().Value);
 
         Clienti.Add(cliente);
 

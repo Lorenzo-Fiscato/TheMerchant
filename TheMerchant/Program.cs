@@ -81,17 +81,65 @@ Disponibili.Prodotti.Add(collana, (1, 200));
 Disponibili.Prodotti.Add(grano, (50, 3.1f));
 Disponibili.Prodotti.Add(farina, (20, 4));
 Disponibili.Prodotti.Add(legno, (15, 6));
-for (int i = 0; i < 20; i++)
+
+
+// --- CONFIGURAZIONE DELLA GIORNATA ---
+int clientiTotaliOggi = 5; // Quanti clienti totali passeranno oggi in bottega
+
+Console.WriteLine("=================================================================");
+Console.WriteLine($" APERTURA BOTTEGA - Stima iniziale della città: {start.Stima:F2}");
+Console.WriteLine("=================================================================");
+
+for (int i = 1; i <= clientiTotaliOggi; i++)
 {
-    start.CreaCliente();
+    Console.WriteLine($"\n==================== [ CLIENTE {i} DI {clientiTotaliOggi} ] ====================");
+    
+    // 1. Generiamo UN SOLO cliente alla volta. 
+    // Questa funzione stamperà le sue caratteristiche (Sesso, Classe, Pazienza, ecc.)
+    start.CreaCliente(); 
+
+    // Prendiamo l'ultimo cliente appena aggiunto alla lista della città
+    Cliente clienteAttuale = start.Clienti.Last();
+
+    // 2. Controllo: Ha deciso di non comprare nulla durante la generazione?
+    if (clienteAttuale.ProdottoDesiderato == null)
+    {
+        Console.WriteLine("\n\"Buongiorno mercante! Oggi sto solo dando un'occhiata in giro, arrivederci!\"");
+        Console.WriteLine("(Il cliente esce senza comprare. Premi un tasto per il prossimo...)");
+        Console.ReadKey();
+        continue; // Salta direttamente al prossimo ciclo del 'for'
+    }
+
+    // Estraiamo i dati dal Tuple (ora che siamo sicuri che esiste)
+    Prodotto prodottoScelto = clienteAttuale.ProdottoDesiderato.Value.Item1;
+    float prezzoDiMercatoLocale = clienteAttuale.ProdottoDesiderato.Value.Item2;
+
+    // 4. Avvio della trattativa vera e propria
+    Console.WriteLine($"\n\"Vorrei acquistare questo articolo: {prodottoScelto.Nome}.\"");
+    Console.WriteLine($"[INFO MERCATO] Prezzo calcolato dalla città: {prezzoDiMercatoLocale} monete.");
+    Console.WriteLine($"[INFO TRATTATIVA] Massimo tollerato dal cliente: {prezzoDiMercatoLocale * prodottoScelto.TolleranzaPrezzo:F2} monete.");
+    
+    // 5. Richiesta prezzo al giocatore
+    Console.Write("\nA quale prezzo iniziale decidi di proporlo? ");
+    if (!float.TryParse(Console.ReadLine(), out float prezzoProposto))
+    {
+        prezzoProposto = prezzoDiMercatoLocale; // Fallback di sicurezza
+    }
+
+    // 6. Parte il tuo metodo di contrattazione
+    clienteAttuale.Acquista(prezzoProposto);
+
+    // 7. Resoconto a fine turno prima del prossimo cliente
+    Console.WriteLine("\n-----------------------------------------------------------------");
+    Console.WriteLine($"STATO AGGIORNATO -> Nuova Stima Città: {start.Stima:F2}/5.00");
+    Console.WriteLine("-----------------------------------------------------------------");
+    
+    Console.WriteLine("Premi un tasto per far entrare il prossimo cliente in bottega...");
+    Console.ReadKey();
 }
 
-Console.WriteLine();
-
-Cliente cliente = start.Clienti.Last();
-if (cliente.ProdottoDesiderato.HasValue) cliente.Acquista(Disponibili.Prodotti.First(p =>  p.Key
-                                                        .Equals(cliente.ProdottoDesiderato.Value.Item1)).Value.Item2);
-
-
-
-
+// --- FINE DELLA GIORNATA ---
+Console.WriteLine("\n=================================================================");
+Console.WriteLine(" CHIUSURA BOTTEGA - LA GIORNATA È TERMINATA!");
+Console.WriteLine($" Stima finale registrata nella città: {start.Stima:F2}");
+Console.WriteLine("=================================================================");

@@ -28,11 +28,11 @@ public class Cliente
         }
 
         // Il cliente valuta il prezzo esposto
-        if (Contratta(prezzoMedio, prezzoVendita))
+        if (Contratta(prezzoVendita, prezzoMedio))
         {
             // Il cliente accetta direttamente il tuo prezzo senza battere ciglio
             Console.WriteLine($"Acquisto effettuato direttamente a {prezzoVendita}!");
-            ModificaStima(prezzoMedio, prezzoVendita);
+            ModificaStima(prezzoVendita, prezzoMedio);
             ModificaSoldi(prezzoVendita);
         }
         else
@@ -44,11 +44,37 @@ public class Cliente
         }
     }
 
-    private void ModificaStima(float prezzoVendita, float prezzoCliente)
+private void ModificaStima(float prezzoVendita, float prezzoCliente)
+{
+    // Calcoliamo il rapporto di profitto/sopraprezzo esagerato.
+    float rapportoSopraprezzo = prezzoVendita / prezzoCliente;
+
+    // Se hai venduto a meno o uguale a quanto voleva il cliente, la città ti adora
+    // Altrimenti, più il rapporto è alto, più la stima scende.
+    float variazioneStima;
+
+    if (rapportoSopraprezzo <= 1.0f)
     {
-        cittaAppartenenza.Stima += (float)Math.Round((1 - prezzoVendita / prezzoCliente) + Pazienza / 100, 2);
-        Console.WriteLine($"La stima della città è ora: {cittaAppartenenza.Stima}");
+        // Ottimo affare per il cliente: la stima sale
+        // Più la pazienza era alta, più il cliente parlerà bene di te in giro.
+        variazioneStima = 0.01f + (Pazienza / 50f);
     }
+    else
+    {
+        // Hai venduto a prezzo maggiorato: la stima scende
+        // Sottraiamo 1 per isolare solo il surplus
+        // La pazienza rimasta attenua il colpo: se il cliente era felice (alta pazienza), si arrabbierà meno
+        variazioneStima = -((rapportoSopraprezzo - 1.0f) / 10) + (Pazienza / 100f);
+    }
+
+    // Applichiamo la variazione alla città arrotondando a 2 decimali
+    cittaAppartenenza.Stima += (float)Math.Round(variazioneStima, 2);
+    
+    // Evitiamo che la stima vada sotto zero o diventi infinita (es. range tra 0.0 e 2.5)
+    cittaAppartenenza.Stima = Math.Clamp(cittaAppartenenza.Stima, 0.0f, 2.5f);
+
+    Console.WriteLine($"[REP] La stima della città è ora: {cittaAppartenenza.Stima:F2}");
+}
 
     private void ModificaPazienza(float prezzoVendita)
     {
@@ -59,7 +85,7 @@ public class Cliente
         Console.WriteLine($"La pazienza del cliente è ora: {Pazienza}");
     }
 
-    private bool Contratta(float prezzoCliente, float prezzoVendita)
+    private bool Contratta(float prezzoVendita, float prezzoCliente)
     {
         if (prezzoVendita <= prezzoCliente) return true; 
 
@@ -129,10 +155,10 @@ public class Cliente
             }
 
             // Il cliente valuta la tua controofferta
-            if (Contratta(prezzoCliente, prezzoAttuale))
+            if (Contratta(prezzoAttuale, prezzoCliente))
             {
                 Console.WriteLine($"Il cliente ha accettato la tua controofferta di {prezzoAttuale}!");
-                ModificaStima(prezzoCliente, prezzoAttuale);
+                ModificaStima(prezzoAttuale, prezzoCliente);
                 ModificaSoldi(prezzoAttuale);
                 return;
             }
