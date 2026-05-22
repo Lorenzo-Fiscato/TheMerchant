@@ -36,7 +36,7 @@ public class Citta
     }
 
     //funzione per scegliere un prodotto desiderato in base alla classe sociale del cliente e alla disponibilità dei prodotti
-    private (Prodotto, float)? scegliProdotto(Cliente cliente)
+    private (Prodotto, float, int)? scegliProdotto(Cliente cliente)
     {
 
     //ottiene una lista dei prodotti che il cliente può comprare tra quelli disponibili
@@ -46,10 +46,23 @@ public class Citta
 
     //sceglie un prodotto random tra quelli disponibili
     var prodottoRand = scegliProdottoRandom(prodottiPossibili);
+    
+    int quantita = 1; //di default è 1 per i prodotti non stackable
 
+    if (prodottoRand.Item1.Stackable)
+    {
+        int maxQuantita = ConfigurazioneEventi.ModificatoreQuantita[EventoInCorso][prodottoRand.Item1.Tag] >
+        Disponibili.Prodotti[prodottoRand.Item1].Item1 ?
+            Disponibili.Prodotti[prodottoRand.Item1].Item1 
+            : 
+            ConfigurazioneEventi.ModificatoreQuantita[EventoInCorso][prodottoRand.Item1.Tag];
 
+        quantita = rand.Next(1, maxQuantita + 1);    
+    }
+    
     //la classe sociale bassa o ricca sceglie sicuramente un prodotto
-    if(cliente.ClasseSociale == TipoClasse.Bassa ||  cliente.ClasseSociale == TipoClasse.Alta) return prodottoRand;
+    if(cliente.ClasseSociale == TipoClasse.Bassa ||  cliente.ClasseSociale == TipoClasse.Alta) 
+        return (prodottoRand.Item1, prodottoRand.Item2, quantita); //sceglie una quantità random tra 1 e la quantità massima per quel prodotto
 
     //la classe sociale media sceglie un prodotto con una certa probabilità, preferendo quelli che scarseggiano in città
     else
@@ -57,15 +70,19 @@ public class Citta
         // Separiamo i prodotti scarsi da quelli abbondanti presenti in questa selezione
         var opzioniScarse = prodottiPossibili.Where(p => !AbbondanteInCitta.ContainsKey(p)).ToList();
 
+        // Se ci sono opzioni scarse in vetrina, la classe media preferisce quelle e compra sicuro!
         if (opzioniScarse.Any())
-            // Se ci sono opzioni scarse in vetrina, la classe media preferisce quelle e compra sicuro!
-            return scegliProdottoRandom(opzioniScarse);
+            {
+                prodottoRand = scegliProdottoRandom(opzioniScarse);
+                return (prodottoRand.Item1, prodottoRand.Item2, quantita);
+            }
+
         else
         {
         // Se in vetrina ci sono SOLO oggetti abbondanti, allora tentiamo l'acquisto con la probabilità
         double scelta = rand.NextDouble() * 4;
         if (scelta < 1.5 * Stima * ConfigurazioneEventi.ModificatoreProbComprare[EventoInCorso][prodottoRand.Item1.Tag])
-            return prodottoRand;
+            return (prodottoRand.Item1, prodottoRand.Item2, quantita);
         }
     }
 

@@ -117,4 +117,58 @@ public static class ConfigurazioneEventi
             })  
         }
     };
+
+    public static Dictionary<Evento, Dictionary<TagProdotto, int>> ModificatoreQuantita { get; } = new Dictionary<Evento, Dictionary<TagProdotto, int>>()
+    {
+        {Evento.Nessuno, (new Dictionary<TagProdotto, int>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 20 },
+                { TagProdotto.CiboPovero, 10 },
+                { TagProdotto.CiboRicco, 5 },
+                { TagProdotto.Materiale, 20 },
+                { TagProdotto.Armamento, 2 },
+                { TagProdotto.Lusso, 2 }
+            })
+        },
+        { Evento.Festa, (new Dictionary<TagProdotto, int>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 15 },
+                { TagProdotto.CiboPovero, 8 },
+                { TagProdotto.CiboRicco, 7 },
+                { TagProdotto.Materiale, 20 },
+                { TagProdotto.Armamento, 1 },
+                { TagProdotto.Lusso, 4 }
+            })
+        },
+        { Evento.Carestia, (new Dictionary<TagProdotto, int>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 25 },
+                { TagProdotto.CiboPovero, 15 },
+                { TagProdotto.CiboRicco, 6 },
+                { TagProdotto.Materiale, 20 },
+                { TagProdotto.Armamento, 1 },
+                { TagProdotto.Lusso, 1 }
+            })
+        },
+        { Evento.Epidemia, (new Dictionary<TagProdotto, int>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 15 },
+                { TagProdotto.CiboPovero, 8 },
+                { TagProdotto.CiboRicco, 4 },
+                { TagProdotto.Materiale, 20 },
+                { TagProdotto.Armamento, 2 },
+                { TagProdotto.Lusso, 1 }
+            })
+        },
+        { Evento.Guerra, (new Dictionary<TagProdotto, int>()
+            {
+                { TagProdotto.BeneDiPrimaNecessita, 25 },
+                { TagProdotto.CiboPovero, 15 },
+                { TagProdotto.CiboRicco, 6 },
+                { TagProdotto.Materiale, 20 },
+                { TagProdotto.Armamento, 5 },
+                { TagProdotto.Lusso, 1 }
+            })
+        }
+    };
 }

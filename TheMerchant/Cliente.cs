@@ -6,44 +6,50 @@ public class Cliente
     public bool Sesso { get; set; }
     public TipoClasse ClasseSociale { get; set; }
     public float Pazienza { get; set; }
-    public (Prodotto Desiderato, float PrezzoMedio)? ProdottoDesiderato { get; set; }
+    public (Prodotto Desiderato, float PrezzoMedio, int Quantita)? ProdottoDesiderato { get; set; }
     public PersonalitaCliente Personalita { get; set; }
     private Random rand = new Random();
     private int nOfferte = 0;
 
     public void Acquista(float prezzoVendita)
     {
+        nOfferte = 0;
         if (!ProdottoDesiderato.HasValue) return;
 
         float prezzoMedio = ProdottoDesiderato.Value.PrezzoMedio;
-        float tolleranza = ProdottoDesiderato.Value.Desiderato.TolleranzaPrezzo;
+        float tolleranza  = ProdottoDesiderato.Value.Desiderato.TolleranzaPrezzo;
+        int quantita = ProdottoDesiderato.Value.Quantita;
+
+        // Tutti i confronti e la trattativa lavorano su prezzi totali
+        float prezzoTotaleAtteso = prezzoMedio * quantita;
+        float prezzoTotaleMax = prezzoMedio * tolleranza * quantita;
+        float prezzoTotaleMin = prezzoMedio * 0.5f * quantita;
 
         // Se il prezzo è oltre la tolleranza massima assoluta, non tratta nemmeno
-        if (prezzoVendita > prezzoMedio * tolleranza)
+        if (prezzoVendita > prezzoTotaleMax)
         {
-            Console.WriteLine(prezzoVendita - prezzoMedio * tolleranza);
+            Console.WriteLine(prezzoVendita - prezzoTotaleMax);
             Console.WriteLine("Prezzo decisamente troppo alto! Il cliente se ne va sdegnato.");
             Pazienza = 0.0f;
-            // Il cliente voleva pagare prezzoMedio, tu hai chiesto prezzoVendita
-            ModificaStima(prezzoVendita, prezzoMedio);
+            // Il cliente voleva pagare prezzoTotaleAtteso, tu hai chiesto prezzoVendita
+            ModificaStima(prezzoVendita, prezzoTotaleAtteso);
             return;
         }
 
-        if (prezzoVendita < prezzoMedio * 0.5f)
+        if (prezzoVendita < prezzoTotaleMin)
         {
             Console.WriteLine("Hai proposto un prezzo troppo basso! Il cliente pensa che tu stia cercando di fregarlo e se ne va.");
-            // Il cliente voleva pagare prezzoMedio, tu hai chiesto prezzoVendita
-            cittaAppartenenza.Stima -= 0.01f; //stima scende leggermente
+            cittaAppartenenza.Stima -= 0.01f; // stima scende leggermente
             return;
         }
 
         // Il cliente valuta il prezzo esposto
-        if (Contratta(prezzoVendita, prezzoMedio))
+        if (Contratta(prezzoVendita, prezzoTotaleAtteso))
         {
             // Il prezzo non gli sta bene, ma è in una fascia accettabile: inizia la trattativa
             Console.WriteLine("Il cliente trova il prezzo alto, ma è disposto a trattare...");
-            ModificaPazienza(prezzoVendita);
-            ProponiOfferta(prezzoVendita);
+            ModificaPazienza(prezzoVendita, prezzoTotaleAtteso);
+            ProponiOfferta(prezzoVendita, prezzoTotaleAtteso);
         }
         else
         {
@@ -55,27 +61,27 @@ public class Cliente
 
     private void ModificaStima(float prezzoVendita, float prezzoCliente, bool forcePositive = false)
     {
-        //rapporto tra il prezzo chiesto e quello del cliente
+        // rapporto tra il prezzo chiesto e quello del cliente
         float rapportoSopraprezzo = prezzoVendita / prezzoCliente;
 
-        float variazioneStima;
-
-        variazioneStima = rapportoSopraprezzo <= 1.0f || forcePositive ?
-            // Ottimo affare per il cliente: la stima sale
-             0.01f
-                :
+        float variazioneStima = rapportoSopraprezzo <= 1.0f || forcePositive
+             // Hai venduto a prezzo giusto o sotto il prezzo del cliente: la stima sale
+            ? 0.01f
             // Hai venduto a prezzo maggiorato: la stima scende
-            -((rapportoSopraprezzo - 1.0f) / 10);
+            : -((rapportoSopraprezzo - 1.0f) / 10);
 
         cittaAppartenenza.Stima += (float)Math.Round(variazioneStima, 2);
-        cittaAppartenenza.Stima = Math.Clamp(cittaAppartenenza.Stima, 0.1f, 2.5f);
+        cittaAppartenenza.Stima  = Math.Clamp(cittaAppartenenza.Stima, 0.1f, 2.5f);
 
         Console.WriteLine($"La stima della città è ora: {cittaAppartenenza.Stima:F2}");
     }
 
-    private void ModificaPazienza(float prezzoVendita)
+    // prezzoTotaleAtteso è passato esplicitamente per evitare il mismatch unitario/totale
+    private void ModificaPazienza(float prezzoVendita, float prezzoTotaleAtteso)
     {
-        float penalita = (prezzoVendita / ProdottoDesiderato.Value.PrezzoMedio) / 10f + (nOfferte / 10f);
+        // La pazienza diminuisce in base a quanto il prezzo supera il totale atteso.
+        // Più offerte si fanno, più la penalità aumenta (+ nOfferte / 10)
+        float penalita = (prezzoVendita / prezzoTotaleAtteso) / 10f + (nOfferte / 10f);
         Pazienza -= (float)Math.Round(penalita, 2);
         if (Pazienza < 0) Pazienza = 0.0f;
         Console.WriteLine($"La pazienza del cliente è ora: {Pazienza}");
@@ -87,17 +93,21 @@ public class Cliente
         if (prezzoVendita <= prezzoCliente) return false;
 
         double rapportoSopraPrezzo = prezzoVendita / prezzoCliente;
+        // Più la pazienza è alta e il prezzo è vicino al prezzo del cliente,
+        // più è probabile che il cliente voglia trattare (return true).
         double sogliaAccettazione = rapportoSopraPrezzo * Math.Sqrt(Pazienza);
 
         return rand.NextDouble() * 1.2 < sogliaAccettazione;
     }
 
-    private void ProponiOfferta(float prezzoVendita)
+    private void ProponiOfferta(float prezzoVendita, float prezzoTotaleAtteso)
     {
         float prezzoAttuale = prezzoVendita;
         // Il cliente formula una prima offerta più vicina al prezzo esposto, influenzata da pazienza, stima e personalità
-        double fattoreAvvicinamento = Math.Clamp((Pazienza * cittaAppartenenza.Stima *
-            ModificatoriPersonalita.ModificatorePrezzoOfferta[Personalita]) + rand.NextDouble() * 0.25, 0.7, 0.9);
+        double fattoreAvvicinamento = Math.Clamp(
+            (Pazienza * cittaAppartenenza.Stima * ModificatoriPersonalita.ModificatorePrezzoOfferta[Personalita])
+            + rand.NextDouble() * 0.25,
+            0.5, 0.7);
         float prezzoCliente = (float)Math.Round(prezzoVendita * fattoreAvvicinamento, 2);
 
         while (Pazienza > 0)
@@ -130,7 +140,7 @@ public class Cliente
                 return;
             }
 
-            //Controofferta del mercante
+            // Controofferta del mercante
             Console.Write("Inserisci il tuo nuovo prezzo: ");
             prezzoAttuale = float.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
@@ -142,9 +152,10 @@ public class Cliente
                 ModificaSoldi(prezzoAttuale);
                 return;
             }
-            if(prezzoCliente * 1.2f > prezzoAttuale)
+
+            if (prezzoCliente * 1.2f > prezzoAttuale)
             {
-                Console.WriteLine("Hai offerto un prezzo vicino al cliente! Il cliente apprezza la tua flessibilità e accetta");
+                Console.WriteLine("Hai offerto un prezzo vicino al cliente! Il cliente apprezza la tua flessibilità e accetta.");
                 ModificaStima(prezzoCliente, prezzoAttuale);
                 ModificaSoldi(prezzoAttuale);
                 return;
@@ -162,14 +173,14 @@ public class Cliente
             if (!Contratta(prezzoAttuale, prezzoCliente))
             {
                 Console.WriteLine($"Il cliente ha accettato la tua controofferta di {prezzoAttuale}!");
-                //forziamo il positivo perchè la formula produce un risultato negativo perchè il rapporto è > 1
+                // forziamo il positivo perché la formula produce un risultato negativo perché il rapporto è > 1
                 ModificaStima(prezzoAttuale, prezzoCliente, forcePositive: true);
                 ModificaSoldi(prezzoAttuale);
                 return;
             }
 
             Console.WriteLine("Il cliente rifiuta la tua controofferta...");
-            ModificaPazienza(prezzoAttuale);
+            ModificaPazienza(prezzoAttuale, prezzoTotaleAtteso);
 
             if (Pazienza <= 0.1f)
             {
@@ -181,11 +192,14 @@ public class Cliente
             // Il prezzo attuale diventa il nuovo tetto massimo per il prossimo calcolo
             prezzoVendita = prezzoAttuale;
             // Il cliente formula una nuova offerta più vicina al prezzo attuale, influenzata da pazienza, stima e personalità
-            fattoreAvvicinamento = Math.Clamp((Pazienza * cittaAppartenenza.Stima *
-                ModificatoriPersonalita.ModificatorePrezzoOfferta[Personalita]) + rand.NextDouble() * 0.25, 0.3, 0.6);
-            float passoMassimo = prezzoCliente * 0.25f; // mai più del 25% per turno
-            float avanzamento = Math.Min(prezzoVendita - prezzoCliente, passoMassimo);
-            prezzoCliente = (float)Math.Round(prezzoCliente + avanzamento * fattoreAvvicinamento, 2);
+            fattoreAvvicinamento = Math.Clamp(
+                (Pazienza * cittaAppartenenza.Stima * ModificatoriPersonalita.ModificatorePrezzoOfferta[Personalita])
+                + rand.NextDouble() * 0.25,
+                0.3, 0.6);
+            // Il cliente non può fare salti bruschi: avanza al massimo del 25% del suo prezzo attuale per turno
+            float passoMassimo = prezzoCliente * 0.25f;
+            float avanzamento  = Math.Min(prezzoVendita - prezzoCliente, passoMassimo);
+            prezzoCliente      = (float)Math.Round(prezzoCliente + avanzamento * fattoreAvvicinamento, 2);
         }
     }
 

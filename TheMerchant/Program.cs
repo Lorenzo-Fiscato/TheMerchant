@@ -5,7 +5,7 @@ Prodotto pane = new Prodotto
     Nome = "Pane",
     ClasseSociale = TipoClasse.Bassa,
     Stackable = true,
-    TolleranzaPrezzo = 1.2f,
+    TolleranzaPrezzo = 1.5f,
     Tag = TagProdotto.CiboPovero
 };
 
@@ -14,7 +14,7 @@ Prodotto grano = new Prodotto
     Nome = "Grano",
     ClasseSociale = TipoClasse.Bassa,
     Stackable = true,
-    TolleranzaPrezzo = 1.2f,
+    TolleranzaPrezzo = 1.5f,
     Tag = TagProdotto.BeneDiPrimaNecessita
 };
 
@@ -23,7 +23,7 @@ Prodotto vino = new Prodotto
     Nome = "Vino",
     ClasseSociale = TipoClasse.Media,
     Stackable = true,
-    TolleranzaPrezzo = 1.1f,
+    TolleranzaPrezzo = 1.2f,
     Tag = TagProdotto.CiboRicco
 };
 
@@ -32,7 +32,7 @@ Prodotto collana = new Prodotto
     Nome = "Collana",
     ClasseSociale = TipoClasse.Alta,
     Stackable = false,
-    TolleranzaPrezzo = 1.05f,
+    TolleranzaPrezzo = 1.2f,
     Tag = TagProdotto.Lusso
 };
 
@@ -41,7 +41,7 @@ Prodotto farina = new Prodotto
     Nome = "Farina",
     ClasseSociale = TipoClasse.Media,
     Stackable = true,
-    TolleranzaPrezzo = 1.2f,
+    TolleranzaPrezzo = 1.5f,
     Tag = TagProdotto.BeneDiPrimaNecessita
 };
 
@@ -50,7 +50,7 @@ Prodotto legno = new Prodotto
     Nome = "Legno",
     ClasseSociale = TipoClasse.Media,
     Stackable = true,
-    TolleranzaPrezzo = 1.3f,
+    TolleranzaPrezzo = 1.5f,
     Tag = TagProdotto.Materiale
 };
 Citta start = new Citta
@@ -114,12 +114,12 @@ for (int i = 1; i <= clientiTotaliOggi; i++)
 
     // Estraiamo i dati dal Tuple (ora che siamo sicuri che esiste)
     Prodotto prodottoScelto = clienteAttuale.ProdottoDesiderato.Value.Item1;
-    float prezzoDiMercatoLocale = clienteAttuale.ProdottoDesiderato.Value.Item2;
+    int quantita = clienteAttuale.ProdottoDesiderato.Value.Item3;
+    float prezzoDiMercatoLocale = clienteAttuale.ProdottoDesiderato.Value.Item2 * quantita;
 
     // 4. Avvio della trattativa vera e propria
-    Console.WriteLine($"\n\"Vorrei acquistare questo articolo: {prodottoScelto.Nome}.\"");
+    Console.WriteLine($"\n\"Vorrei acquistare {quantita} unità di {prodottoScelto.Nome}.\"");
     Console.WriteLine($"[INFO MERCATO] Prezzo calcolato dalla città: {prezzoDiMercatoLocale} monete.");
-    Console.WriteLine($"[INFO TRATTATIVA] Massimo tollerato dal cliente: {prezzoDiMercatoLocale * prodottoScelto.TolleranzaPrezzo:F2} monete.");
     
     // 5. Richiesta prezzo al giocatore
     Console.Write("\nA quale prezzo iniziale decidi di proporlo? ");
