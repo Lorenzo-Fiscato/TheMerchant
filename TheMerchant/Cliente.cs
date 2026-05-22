@@ -44,7 +44,8 @@ public class Cliente
         }
 
         // Il cliente valuta il prezzo esposto
-        if (Contratta(prezzoVendita, prezzoTotaleAtteso))
+        //moltiplicato per 1.1f per evitare di ritornare sempre false a causa del rapporto del prezzo = 1
+        if (Contratta(prezzoVendita * 1.1f, prezzoTotaleAtteso))
         {
             // Il prezzo non gli sta bene, ma è in una fascia accettabile: inizia la trattativa
             Console.WriteLine("Il cliente trova il prezzo alto, ma è disposto a trattare...");

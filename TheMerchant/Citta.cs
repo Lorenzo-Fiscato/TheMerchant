@@ -9,7 +9,7 @@ public class Citta
     public Dictionary<Prodotto, float> AbbondanteInCitta { get; set; } = new Dictionary<Prodotto, float>();
     public Dictionary<Prodotto, float> Prodotti { get; set; } = new Dictionary<Prodotto, float>();
     public List<Cliente> Clienti { get; set; } = new List<Cliente>();
-    public Evento EventoInCorso { get; set; } = Evento.Nessuno;
+    public Evento EventoInCorso { get; set; } = Evento.Carestia;
 
     private Random rand = new Random();
 
@@ -46,7 +46,7 @@ public class Citta
 
     //sceglie un prodotto random tra quelli disponibili
     var prodottoRand = scegliProdottoRandom(prodottiPossibili);
-    
+
     int quantita = 1; //di default è 1 per i prodotti non stackable
 
     if (prodottoRand.Item1.Stackable)

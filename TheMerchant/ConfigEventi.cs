@@ -88,8 +88,8 @@ public static class ConfigurazioneEventi
         },
         { Evento.Carestia, (new Dictionary<TagProdotto, float>()
             {
-                { TagProdotto.BeneDiPrimaNecessita, 2.0f },
-                { TagProdotto.CiboPovero, 2.0f },
+                { TagProdotto.BeneDiPrimaNecessita, 1.5f },
+                { TagProdotto.CiboPovero, 1.5f },
                 { TagProdotto.CiboRicco, 1.2f },
                 { TagProdotto.Materiale, 1.0f },
                 { TagProdotto.Armamento, 0.8f },
