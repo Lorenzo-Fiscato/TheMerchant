@@ -45,7 +45,7 @@ public class Cliente
 
         // Il cliente valuta il prezzo esposto
         //moltiplicato per 1.1f per evitare di ritornare sempre false a causa del rapporto del prezzo = 1
-        if (Contratta(prezzoVendita * 1.1f, prezzoTotaleAtteso))
+        if (Contratta(prezzoVendita, prezzoTotaleAtteso, isOfferta: false))
         {
             // Il prezzo non gli sta bene, ma è in una fascia accettabile: inizia la trattativa
             Console.WriteLine("Il cliente trova il prezzo alto, ma è disposto a trattare...");
@@ -88,15 +88,15 @@ public class Cliente
         Console.WriteLine($"La pazienza del cliente è ora: {Pazienza}");
     }
 
-    private bool Contratta(float prezzoVendita, float prezzoCliente)
+    private bool Contratta(float prezzoVendita, float prezzoCliente, bool isOfferta = true)
     {
         // return false = accetta subito.
-        if (prezzoVendita <= prezzoCliente) return false;
+        if (prezzoVendita <= prezzoCliente && isOfferta) return false;
 
         double rapportoSopraPrezzo = prezzoVendita / prezzoCliente;
         // Più la pazienza è alta e il prezzo è vicino al prezzo del cliente,
         // più è probabile che il cliente voglia trattare (return true).
-        double sogliaAccettazione = rapportoSopraPrezzo * Math.Sqrt(Pazienza);
+        double sogliaAccettazione = rapportoSopraPrezzo * Pazienza;
 
         return rand.NextDouble() * 1.2 < sogliaAccettazione;
     }
